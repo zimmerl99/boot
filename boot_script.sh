@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COUNTER_FILE="/boot/.crash_counter"
+COUNTER_FILE="/home/gfrpi/boot/.crash_counter"
 MAX_CRASHES=5
 
 # Read current crash count
@@ -12,17 +12,17 @@ fi
 
 # Check if exceeded max crashes
 if [ "$CRASH_COUNT" -ge "$MAX_CRASHES" ]; then
-    echo "Ntrip client has crashed ($MAX_CRASHES) times. Check connection." >> /boot/crash.log
+    echo "Ntrip client has crashed ($MAX_CRASHES) times. Check connection." >> /home/gfrpi/boot/crash.log
     exit 1
 fi
 
 # Run the Python script
-python3 /boot/ntrip_and_rtcm.py
+python3 /home/gfrpi/boot/boot_rtk_v2.py
 
 # the script crashed
 CRASH_COUNT=$((CRASH_COUNT + 1))
 echo "$CRASH_COUNT" > "$COUNTER_FILE"
-echo "Crash #$CRASH_COUNT at $(date)" >> /home/pi/crash.log
+echo "Crash #$CRASH_COUNT at $(date)" >> /home/gfrpi/boot/crash.log
 
 # Reboot
 sudo reboot
