@@ -348,8 +348,6 @@ class NTRIPClient:
         data_thread = threading.Thread(target=self.read_xsens_data, daemon=True)
         data_thread.start()
     
-        self.log("\nNTRIP Client Running - Press Ctrl+C to stop\n")
-    
         try:
             while self.running:
                 time.sleep(1)

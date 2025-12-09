@@ -1,0 +1,17 @@
+[Unit]
+Description=NTRIP RTK Client for Xsens
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gfrpi
+WorkingDirectory=/home/gfrpi/boot
+ExecStart=/usr/bin/python3 /home/gfrpi/boot/boot_rtk_v2.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
