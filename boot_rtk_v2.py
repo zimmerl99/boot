@@ -250,9 +250,17 @@ class NTRIPClient:
         
         packet_count = 0
         last_print = time.time()
+        reconnect_attempts = 0
+        max_reconnect_attempts = 5
         
-        while self.running:
+        while self.running and reconnect_attempts < max_reconnect_attempts:
             try:
+                # Check if usb is connected
+                if not self.serial_xsens or not self.serial_xsens.is_open:
+                    self.log("[Xsens Monitor] Serial port closed, waiting for reconnection...")
+                    time.sleep(5)
+                    continue
+
                 # Check if data is available
                 if self.serial_xsens.in_waiting > 0:
                     # Read available data
@@ -271,13 +279,23 @@ class NTRIPClient:
                                   f"Xsens: Received {packet_count} data packets")
                             packet_count = 0
                         last_print = current_time
-                
+                # Reset reconnect counter on successful read
+                reconnect_attempts = 0
                 time.sleep(0.1)
-                
-            except Exception as e:
+            except (serial.SerialException, OSError) as e:
                 self.log(f"[Xsens Monitor] Error: {e}")
-                break
+                reconnect_attempts += 1
+                self.log(f"[Xsens Monitor] Waiting for serial reconnection (attempt {reconnect_attempts})...")
+                time.sleep(5)
+                continue
+            except Exception as e:
+                self.log(f"[Xsens Monitor] Unexpected error: {e}")
+                reconnect_attempts += 1
+                time.sleep(5)
+                continue
         
+        if reconnect_attempts >= max_reconnect_attempts:
+            self.log("[Xsens Monitor] Max reconnection attempts reached")
         self.log("[Xsens Monitor] Stopped")
     
     def start(self):
