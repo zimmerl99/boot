@@ -184,7 +184,21 @@ class NTRIPClient:
                     self.bytes_forwarded += bytes_written
                 except serial.SerialException as e:
                     self.log(f"[RTCM Thread] Serial error: {e}")
-                    time.sleep(1)
+                    try:
+                        self.serial_xsens.close()
+                    except:
+                        pass
+                    self.serial_xsens = None
+                    time.sleep(5)
+                    continue
+                except OSError as e:
+                    self.log(f"[RTCM Thread] Serial I/O error: {e}")
+                    try:
+                        self.serial_xsens.close()
+                    except:
+                        pass
+                    self.serial_xsens = None
+                    time.sleep(5)
                     continue
                 
                 # Print status every 2 seconds
